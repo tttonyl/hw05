@@ -22,18 +22,18 @@ LOCATION 's3://gu-anly502/ps05/forensicswiki/2012/12/';
 create temporary table clean_logs (
   agent STRING,
   datetime string,
-  size BIGINT
+  size BIGINT,
+  bot BOOLEAN
 );
 
 insert overwrite table clean_logs
-  select host,
+  select agent,
          from_unixtime(unix_timestamp(rawdatetime, "[dd/MMM/yyyy:HH:mm:ss Z]")),
-         regexp_extract(request,".[^ ]* ([^ ]*)")
-         
+         size,
+         bot        
   from apache_common_log;
 
-
-SELECT * FROM clean_logs limit 3;
+SELECT * FROM clean_logs limit 30;
 
 
 --72.47.85.98	2012-12-01 08:19:03	/
