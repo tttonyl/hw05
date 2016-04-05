@@ -20,9 +20,9 @@ STORED AS TEXTFILE
 LOCATION 's3://gu-anly502/ps05/forensicswiki/2012/12/';
 
 create temporary table clean_logs (
-  host string,
+  agent STRING,
   datetime string,
-  url string
+  size BIGINT
 );
 
 insert overwrite table clean_logs
@@ -34,3 +34,8 @@ insert overwrite table clean_logs
 
 
 SELECT * FROM clean_logs limit 3;
+
+
+--72.47.85.98	2012-12-01 08:19:03	/
+--69.163.129.236	2012-12-01 08:19:04	/w/extensions/BibTex/bibtex.css
+--69.163.129.236	2012-12-01 08:19:04	/w/extensions/BibTex/bibtex.js
