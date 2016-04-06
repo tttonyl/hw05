@@ -38,7 +38,7 @@ insert overwrite table agent_logs
          agent,
          size,
          case 
-           WHEN agent LIKE '%bot%' THEN TRUE
+           WHEN lower(agent) LIKE '%bot%' THEN TRUE
            ELSE FALSE
          END
   from raw_logs;
