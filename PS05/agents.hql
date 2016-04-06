@@ -31,15 +31,27 @@ create temporary table agent_logs (
   bot   boolean
 );
 
-insert overwrite table agent_logs
 -- YOUR CODE GOES HERE
 
+insert overwrite table agent_logs
+  select from_unixtime(unix_timestamp(rawdatetime, "[dd/MMM/yyyy:HH:mm:ss Z]")),
+         agent,
+         size,
+         case 
+           WHEN agent LIKE '%bot%' THEN TRUE
+           ELSE FALSE
+         END
+  from raw_logs;
 -- Section #1:
-select YOUR CODE GOES HERE
+
+SELECT * FROM agent_logs limit 3;
 
 -- Section #2: Provide 5 agents for which the OS could not be classified that are bots
-select YOUR CODE GOES HERE
+
+select * from agent_logs where bot limit 5;
 
 -- Section #3: Provide 5 agents for which the OS could not be classified that are not bots.
-select YOUR CODE GOES HERE
+
+select * from agent_logs where not bot limit 5;
+
 
