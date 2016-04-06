@@ -1,0 +1,14 @@
+linux	124930
+mac	83495
+windows	545858
+
+Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)
+Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+Mozilla/5.0 (compatible; AhrefsBot/4.0; +http://ahrefs.com/robot/)
+
+Serf/1.1.0 mod_pagespeed/1.1.23.1-2169
+Serf/1.1.0 mod_pagespeed/1.1.23.1-2169
+Serf/1.1.0 mod_pagespeed/1.1.23.1-2169
+Serf/1.1.0 mod_pagespeed/1.1.23.1-2169
+Serf/1.1.0 mod_pagespeed/1.1.23.1-2169
