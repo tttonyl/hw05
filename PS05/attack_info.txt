@@ -4,5 +4,8 @@ Find the logfile lines that contain this request and report:
 • Are there other attacks from the same IP addresses? (If there is more than 1, investigate 3 of them.) 
 
 Your answer goes here:
+From one IP. [Row(ipaddr=u'92.50.158.21')]
+2012-09-07:06:17:05--2012-09-07:06:18:40
+I think this ip just sent the same request every time but with different amount. same request means repeating CHAR(45,120,57,45,81,45) different times every request.
 
 
