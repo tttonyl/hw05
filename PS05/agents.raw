@@ -1,0 +1,88 @@
+0: jdbc:hive2://localhost:10000> SET mapred.input.dir.recursive=true;
+0: jdbc:hive2://localhost:10000> SET hive.mapred.supports.subdirectories=true;
+0: jdbc:hive2://localhost:10000> SET hive.groupby.orderby.position.alias=true;
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> DROP TABLE IF EXISTS raw_logs;
+0: jdbc:hive2://localhost:10000> CREATE EXTERNAL TABLE raw_logs (
+. . . . . . . . . . . . . . . .>   host STRING,
+. . . . . . . . . . . . . . . .>   identity STRING,
+. . . . . . . . . . . . . . . .>   user STRING,
+. . . . . . . . . . . . . . . .>   rawdatetime STRING,
+. . . . . . . . . . . . . . . .>   request STRING,
+. . . . . . . . . . . . . . . .>   status STRING,
+. . . . . . . . . . . . . . . .>   size STRING,
+. . . . . . . . . . . . . . . .>   refer STRING,
+. . . . . . . . . . . . . . . .>   agent STRING
+. . . . . . . . . . . . . . . .>   )
+. . . . . . . . . . . . . . . .> ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+. . . . . . . . . . . . . . . .> WITH SERDEPROPERTIES (
+. . . . . . . . . . . . . . . .>   "input.regex" = "([^ ]*) ([^ ]*) ([^ ]*) (-|\\[[^\\]]*\\]) ([^ \"]*|\"[^\"]*\") (-|[0-9]*) (-|[0-9]*) \"([^\"]*)\" \"([^\"]*)\".*",
+. . . . . . . . . . . . . . . .>   "output.format.string" = "%1$s %2$s %3$s %4$s %5$s %6$s %7$s %8$s %9$s"
+. . . . . . . . . . . . . . . .> )
+. . . . . . . . . . . . . . . .> STORED AS TEXTFILE
+. . . . . . . . . . . . . . . .> LOCATION 's3://gu-anly502/ps05/forensicswiki/2012/';
+0: jdbc:hive2://localhost:10000> --LOCATION 's3://gu-anly502/ps05/forensicswiki/2012/12/';
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> DROP TABLE IF EXISTS agent_logs;
+0: jdbc:hive2://localhost:10000> create temporary table agent_logs (
+. . . . . . . . . . . . . . . .>   date  timestamp,
+. . . . . . . . . . . . . . . .>   agent string,
+. . . . . . . . . . . . . . . .>   os    string,
+. . . . . . . . . . . . . . . .>   bot   boolean
+. . . . . . . . . . . . . . . .> );
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> insert overwrite table agent_logs
+. . . . . . . . . . . . . . . .> -- YOUR CODE GOES HERE
+. . . . . . . . . . . . . . . .>   select from_unixtime(unix_timestamp(rawdatetime, "[dd/MMM/yyyy:HH:mm:ss Z]")),
+. . . . . . . . . . . . . . . .>          agent,
+. . . . . . . . . . . . . . . .>          if ( instr(lower(agent),"windows")>0, "windows", if ( instr(lower(agent),"mac")>0, "mac",
+. . . . . . . . . . . . . . . .> if ( instr(lower(agent), "linux")>0, "linux",""))),
+. . . . . . . . . . . . . . . .>          instr(lower(agent),"bot")>0
+. . . . . . . . . . . . . . . .>   from raw_logs;
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- Section #1:
+0: jdbc:hive2://localhost:10000> select os, count(*)
+. . . . . . . . . . . . . . . .> from agent_logs
+. . . . . . . . . . . . . . . .> where not bot AND os != ''
+. . . . . . . . . . . . . . . .> group by os;
++----------+----------+--+
+|    os    |   _c1    |
++----------+----------+--+
+| windows  | 7817210  |
+| linux    | 1484909  |
+| mac      | 1092292  |
++----------+----------+--+
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> -- Section #2: Provide 5 agents for which the OS could not be classified that are bots
+0: jdbc:hive2://localhost:10000> select agent
+. . . . . . . . . . . . . . . .> from agent_logs
+. . . . . . . . . . . . . . . .> where bot AND os = '' AND length(agent) > 15
+. . . . . . . . . . . . . . . .> limit 5;
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--+
+|                                                                                   agent                                                                                    |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--+
+| Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)                                                                                                   |
+| SAMSUNG-SGH-E250/1.0 Profile/MIDP-2.0 Configuration/CLDC-1.1 UP.Browser/6.2.3.3.c.1.101 (GUI) MMP/2.0 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)  |
+| Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)                                                                                                   |
+| DoCoMo/2.0 N905i(c100;TB;W24H16) (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)                                                                       |
+| Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)                                                                                                   |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--+
+0: jdbc:hive2://localhost:10000>  
+0: jdbc:hive2://localhost:10000> 
+0: jdbc:hive2://localhost:10000> --  Section #3: Provide 5 agents for which the OS could not be classified that are not bots.
+0: jdbc:hive2://localhost:10000> select agent
+. . . . . . . . . . . . . . . .> from agent_logs
+. . . . . . . . . . . . . . . .> where not bot AND os = '' AND length(agent) > 15
+. . . . . . . . . . . . . . . .> limit 5;
++------------------------------------------+--+
+|                  agent                   |
++------------------------------------------+--+
+| Serf/0.7.2 mod_pagespeed/0.10.22.6-1798  |
+| Serf/0.7.2 mod_pagespeed/0.10.22.6-1798  |
+| Serf/0.7.2 mod_pagespeed/0.10.22.6-1798  |
+| Serf/0.7.2 mod_pagespeed/0.10.22.6-1798  |
+| Serf/0.7.2 mod_pagespeed/0.10.22.6-1798  |
++------------------------------------------+--+
+0: jdbc:hive2://localhost:10000> 

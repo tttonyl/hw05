@@ -6,6 +6,8 @@ Find the logfile lines that contain this request and report:
 Your answer goes here:
 From one IP. [Row(ipaddr=u'92.50.158.21')]
 2012-09-07:06:17:05--2012-09-07:06:18:40
-I think this ip just sent the same request every time but with different amount. same request means repeating CHAR(45,120,57,45,81,45) different times every request.
+By looking for the actual contents of request from this IP, I found out that contents of requests are different from each other each time. But I noticed that each time the request are SQL query mixed with actual request characters, by doing this, the server may take this request as a normal one and gets attacked. I also searched about the SQL injection attack, and this IP used the SQL Injection with the UNION keyword. I checked all logs and find that maybe only this user used 'UNION' in his attacks.
+I searched some of the SQL query keywords like 'select', 'union', 'from' in all logs and it seems that just this IP used this form(mix request with SQL query) as attack?
+p.s. why '%27' is a keyword for sql injection?
 
 
